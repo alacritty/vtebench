@@ -1,0 +1,11 @@
+[package]
+name = "vtebench"
+version = "0.1.0"
+authors = ["Joe Wilm <joe@jwilm.com>"]
+
+[dependencies]
+structopt = "0.1"
+structopt-derive = "0.1"
+terminfo = "0.4"
+failure = "0.1"
+rand = "0.4"
