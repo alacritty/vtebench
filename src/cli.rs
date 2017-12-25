@@ -33,7 +33,7 @@ pub struct Options {
     #[structopt(short = "c", help = "colorized output (not all tests support)")]
     pub colorize: bool,
 
-    #[structopt(long = "term", help = "height of terminal", default_value = "xterm-256color")]
+    #[structopt(long = "term", help = "terminal name (terminfo)", default_value = "xterm-256color")]
     pub term: String,
 
     #[structopt(subcommand)]
