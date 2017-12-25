@@ -4,6 +4,8 @@ version = "0.1.0"
 license = "Apache 2.0"
 authors = ["Joe Wilm <joe@jwilm.com>"]
 description = "Benchmark terminal emulators"
+documentation = "https://docs.rs/vtebench"
+repository = "https://github.com/jwilm/vtebench"
 
 [dependencies]
 structopt = "0.1"
