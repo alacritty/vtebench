@@ -27,6 +27,13 @@ In the future, it would be nice to have a script to automate generating all of
 the tests, running them several times and generate statistics, and print all the
 results in a machine+human friendly format.
 
+### The `-b|--bytes` flag
+
+It's important to generate sufficient output to test the terminal. If the test
+only takes 1ms to complete, you lack statistical significance. As a guideline,
+`time cat <script>` should take at least 1 second. How much data is needed to
+get there will vary greatly by terminal.
+
 ## Contributing
 
 If you wish to add a new test, do the following:
