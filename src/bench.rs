@@ -68,12 +68,27 @@ pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) ->
     written += ctx.csr(0, h - 2)?;
     written += ctx.cup(h - 1, 0)?;
     ctx.write_all(b"REGION BOTTOM")?;
+    written += ctx.cup(0, 0)?;
     while written < options.bytes {
         ctx.write_all(YES)?;
         written += YES.len();
     }
 
     ctx.csr(0, h)?;
+    ctx.sgr0()?;
+
+    Ok(written)
+}
+
+pub fn scrolling<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
+    let mut written = 0;
+
+    written += ctx.smcup()?;
+    while written < options.bytes {
+        ctx.write_all(YES)?;
+        written += YES.len();
+    }
+    ctx.rmcup()?;
     ctx.sgr0()?;
 
     Ok(written)

@@ -54,4 +54,10 @@ pub enum Benchmark {
         help = "Line feed within a scrolling region"
     )]
     ScrollingInRegion,
+
+    #[structopt(
+        name = "scrolling",
+        help = "Repeatedly outputs 'y\\n'"
+    )]
+    Scrolling,
 }
