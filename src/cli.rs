@@ -45,19 +45,19 @@ pub struct Options {
 pub enum Benchmark {
     #[structopt(
         name = "alt-screen-random-write",
-        help = "Set alt screen; repeatedly: pick random location, write ascii"
+        about = "Set alt screen; repeatedly: pick random location, write ascii"
     )]
     AltScreenRandomWrite,
 
     #[structopt(
         name = "scrolling-in-region",
-        help = "Line feed within a scrolling region"
+        about = "Repeatedly outputs 'y\\n' within a scrolling region"
     )]
     ScrollingInRegion,
 
     #[structopt(
         name = "scrolling",
-        help = "Repeatedly outputs 'y\\n'"
+        about = "Repeatedly outputs 'y\\n'"
     )]
     Scrolling,
 }
