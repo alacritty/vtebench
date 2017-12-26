@@ -61,6 +61,7 @@ fn run() -> Result<()> {
     // Run the requested benchmark
     match options.benchmark {
         Benchmark::AltScreenRandomWrite => bench::alt_screen_random_write(&mut ctx, &options)?,
+        Benchmark::ScrollingInRegion => bench::scrolling_in_region(&mut ctx, &options)?,
     };
 
     // Success!

@@ -19,17 +19,29 @@ use context::Context;
 use cli::Options;
 use result::Result;
 
+static YES: &[u8] = b"\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
+    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny";
+
 pub fn alt_screen_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
     let mut written = 0;
     let mut rng = rand::thread_rng();
     let h = options.height;
     let w = options.width;
-    let mut buf = Vec::<u8>::with_capacity(w as usize);
 
     ctx.smcup()?;
 
     while written < options.bytes {
-        buf.clear();
         let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 2));
         let space = w - c;
         let to_write = rng.gen_range(0, space);
@@ -43,6 +55,26 @@ pub fn alt_screen_random_write<W: Write>(ctx: &mut Context<W>, options: &Options
 
     ctx.sgr0()?;
     ctx.rmcup()?;
+
+    Ok(written)
+}
+
+pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
+    let mut written = 0;
+    let h = options.height;
+
+
+    // First, setup the scroll region. Use as many lines as there are available, less 1.
+    written += ctx.csr(0, h - 2)?;
+    written += ctx.cup(h - 1, 0)?;
+    ctx.write_all(b"REGION BOTTOM")?;
+    while written < options.bytes {
+        ctx.write_all(YES)?;
+        written += YES.len();
+    }
+
+    ctx.csr(0, h)?;
+    ctx.sgr0()?;
 
     Ok(written)
 }

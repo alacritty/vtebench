@@ -48,4 +48,10 @@ pub enum Benchmark {
         help = "Set alt screen; repeatedly: pick random location, write ascii"
     )]
     AltScreenRandomWrite,
+
+    #[structopt(
+        name = "scrolling-in-region",
+        help = "Line feed within a scrolling region"
+    )]
+    ScrollingInRegion,
 }

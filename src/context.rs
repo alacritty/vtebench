@@ -67,6 +67,15 @@ impl<'a, W: Write + 'a> Context<'a, W> {
         self.write_all(&sgr0)?;
         Ok(sgr0.len())
     }
+
+    pub fn csr(&mut self, top: u16, bottom: u16) -> Result<usize> {
+        let csr = expand!(
+            self.db.get::<cap::ChangeScrollRegion>().unwrap().as_ref();
+            top, bottom
+        )?;
+        self.write_all(&csr)?;
+        Ok(csr.len())
+    }
 }
 
 impl<'a, W: Write + 'a> Write for Context<'a, W> {
