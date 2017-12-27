@@ -50,6 +50,12 @@ pub enum Benchmark {
     AltScreenRandomWrite,
 
     #[structopt(
+        name = "unicode-random-write",
+        about = "Repeatedly picks location and writes unicode character"
+    )]
+    UnicodeRandomWrite,
+
+    #[structopt(
         name = "scrolling-in-region",
         about = "Repeatedly outputs 'y\\n' within a scrolling region"
     )]
