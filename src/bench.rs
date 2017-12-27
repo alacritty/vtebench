@@ -93,3 +93,26 @@ pub fn scrolling<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<us
 
     Ok(written)
 }
+
+pub fn unicode_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
+    let mut written = 0;
+    let mut rng = rand::thread_rng();
+    let h = options.height;
+    let w = options.width;
+
+    while written < options.bytes {
+        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 2));
+
+        written += ctx.cup(l, c)?;
+        if options.colorize {
+            written += ctx.setaf(rng.gen_range(0, 8))?;
+        }
+
+        let unicode_value = rng.gen_range(0, u16::max_value());
+        let unicode = String::from_utf16_lossy(&vec![unicode_value]).into_bytes();
+        ctx.write_all(&unicode)?;
+        written += unicode.len();
+    }
+
+    Ok(written)
+}

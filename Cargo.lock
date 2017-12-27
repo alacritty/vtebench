@@ -1,6 +1,6 @@
 [root]
 name = "vtebench"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
