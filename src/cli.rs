@@ -59,11 +59,31 @@ pub enum Benchmark {
         name = "scrolling-in-region",
         about = "Repeatedly outputs 'y\\n' within a scrolling region"
     )]
-    ScrollingInRegion,
+    ScrollingInRegion {
+        #[structopt(long = "fill-lines", help = "fills lines instead of using y\\n")]
+        fill_lines: bool,
+
+        #[structopt(
+            long = "lines-from-top",
+            help = "how far scrolling region extends from top",
+            default_value = "0"
+        )]
+        lines_from_top: u16,
+
+        #[structopt(
+            long = "lines-from-bottom",
+            help = "how far scrolling region extends from bottom",
+            default_value = "0"
+        )]
+        lines_from_bottom: u16,
+    },
 
     #[structopt(
         name = "scrolling",
         about = "Repeatedly outputs 'y\\n'"
     )]
-    Scrolling,
+    Scrolling {
+        #[structopt(long = "fill-lines", help = "fills lines instead of using y\\n")]
+        fill_lines: bool,
+    },
 }

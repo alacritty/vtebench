@@ -16,7 +16,7 @@ use std::io::Write;
 use rand::{self, Rng};
 
 use context::Context;
-use cli::Options;
+use cli::{Options, Benchmark};
 use result::Result;
 
 static YES: &[u8] = b"\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
@@ -59,19 +59,42 @@ pub fn alt_screen_random_write<W: Write>(ctx: &mut Context<W>, options: &Options
     Ok(written)
 }
 
+fn build_scroll_buf(fill: bool, cols: u16) -> Vec<u8> {
+    if fill {
+        let mut buf = Vec::new();
+        for _ in 0..(cols - 1) {
+            buf.push(b'a');
+        }
+        buf.push(b'\n');
+        buf
+    } else {
+        YES.to_owned()
+    }
+}
+
 pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
     let mut written = 0;
     let h = options.height;
 
+    let (fill_lines, lines_from_top, lines_from_bottom) = match options.benchmark {
+        Benchmark::ScrollingInRegion { fill_lines, lines_from_top, lines_from_bottom } => (
+            fill_lines, lines_from_top, lines_from_bottom
+        ),
+        _ => panic!("Wrong benchmark"),
+    };
 
     // First, setup the scroll region. Use as many lines as there are available, less 1.
-    written += ctx.csr(0, h - 2)?;
-    written += ctx.cup(h - 1, 0)?;
-    ctx.write_all(b"REGION BOTTOM")?;
-    written += ctx.cup(0, 0)?;
+    written += ctx.csr(lines_from_top, h - 2 - lines_from_bottom)?;
+    for i in 0..lines_from_bottom {
+        written += ctx.cup(h - 1 - i, 0)?;
+        ctx.write_all(b"REGION BOTTOM")?;
+    }
+    written += ctx.cup(lines_from_top, 0)?;
+
+    let buf = build_scroll_buf(fill_lines, options.width);
     while written < options.bytes {
-        ctx.write_all(YES)?;
-        written += YES.len();
+        ctx.write_all(&buf)?;
+        written += buf.len();
     }
 
     ctx.csr(0, h)?;
@@ -83,12 +106,16 @@ pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) ->
 pub fn scrolling<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
     let mut written = 0;
 
-    written += ctx.smcup()?;
+    let fill_lines = match options.benchmark {
+        Benchmark::Scrolling { fill_lines } => fill_lines,
+        _ => panic!("Wrong benchmark"),
+    };
+
+    let buf = build_scroll_buf(fill_lines, options.width);
     while written < options.bytes {
-        ctx.write_all(YES)?;
-        written += YES.len();
+        ctx.write_all(&buf)?;
+        written += buf.len();
     }
-    ctx.rmcup()?;
     ctx.sgr0()?;
 
     Ok(written)

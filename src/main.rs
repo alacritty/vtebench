@@ -62,8 +62,8 @@ fn run() -> Result<()> {
     match options.benchmark {
         Benchmark::AltScreenRandomWrite => bench::alt_screen_random_write(&mut ctx, &options)?,
         Benchmark::UnicodeRandomWrite => bench::unicode_random_write(&mut ctx, &options)?,
-        Benchmark::ScrollingInRegion => bench::scrolling_in_region(&mut ctx, &options)?,
-        Benchmark::Scrolling => bench::scrolling(&mut ctx, &options)?,
+        Benchmark::ScrollingInRegion { .. } => bench::scrolling_in_region(&mut ctx, &options)?,
+        Benchmark::Scrolling { .. } => bench::scrolling(&mut ctx, &options)?,
     };
 
     // Success!
