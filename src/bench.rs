@@ -87,7 +87,8 @@ pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) ->
     written += ctx.csr(lines_from_top, h - 2 - lines_from_bottom)?;
     for i in 0..lines_from_bottom {
         written += ctx.cup(h - 1 - i, 0)?;
-        ctx.write_all(b"REGION BOTTOM")?;
+        let message = format!("REGION BOTTOM {}", i);
+        ctx.write_all(&message.into_bytes())?;
     }
     written += ctx.cup(lines_from_top, 0)?;
 
