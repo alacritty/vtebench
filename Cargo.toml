@@ -8,8 +8,8 @@ documentation = "https://docs.rs/vtebench"
 repository = "https://github.com/jwilm/vtebench"
 
 [dependencies]
-structopt = "0.1"
-structopt-derive = "0.1"
-terminfo = "0.4"
-failure = "0.1"
-rand = "0.4"
+structopt-derive = "0.2.10"
+structopt = "0.2.10"
+terminfo = "0.6.1"
+failure = "0.1.2"
+rand = "0.5.5"
