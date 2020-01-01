@@ -21,12 +21,12 @@ should be run in the projects root directory and will output the benchmark
 files to `target/benchmarks`.
 
 After the files have been generated, the performance can be measured with
-[perf](https://perf.wiki.kernel.org/index.php/Main_Page):
+[perf](https://perf.wiki.kernel.org/index.php/Main_Page), or
+[hyperfine](https://github.com/sharkdp/hyperfine) on macOS or Windows:
 
 ```sh
 perf stat -r 10 cat target/benchmarks/alt-screen-random-write.vte
-perf stat -r 10 cat target/benchmarks/scrolling-in-region.vte
-perf stat -r 10 cat target/benchmarks/scrolling.vte
+hyperfine --show-output "cat target/benchmarks/scrolling.vte"
 ```
 
 Great instructions on how to reliably generate consistent benchmarks can be
