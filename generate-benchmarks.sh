@@ -27,7 +27,7 @@ function generate_benchmark {
     printf "\ec" >> "$file"
 }
 
-# Compile vtebench before starting anything time sesitive
+# Compile vtebench before starting anything time sensitive
 cargo build --release
 
 # ASRW benchmark has big differences running from file, so we use a higher timeout here

@@ -17,7 +17,7 @@ understanding, **not** performance.
 
 To generate the most basic commands, the
 [`generate-benchmarks.sh`](./generate-benchmarks.sh) script can be used. This
-should be run in the projects root directory and will output the benchmark
+should be run in the project's root directory and will output the benchmark
 files to `target/benchmarks`.
 
 After the files have been generated, the performance can be measured with
