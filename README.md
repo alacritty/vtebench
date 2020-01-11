@@ -13,19 +13,26 @@ vtebench -w $(tput cols) -h $(tput lines) [-c|-b=BYTES|-t=TERM] <benchmark>
 
 Terminal protocol will be output to `stdout`. Output **must be** directed into a
 file rather than used directly to benchmark. `vtebench` is written for ease of
-understanding, **not** performance. To benchmark the currently running terminal
-then, something like this would work:
+understanding, **not** performance.
+
+To generate the most basic commands, the
+[`generate-benchmarks.sh`](./generate-benchmarks.sh) script can be used. This
+should be run in the project's root directory and will output the benchmark
+files to `target/benchmarks`.
+
+After the files have been generated, the performance can be measured with
+[perf](https://perf.wiki.kernel.org/index.php/Main_Page), or
+[hyperfine](https://github.com/sharkdp/hyperfine) on macOS or Windows:
 
 ```sh
-vtebench -w $(tput cols) -h $(tput lines) alt-screen-random-write \
-    > /tmp/100mb.vte
-
-time cat /tmp/100mb.vte
+perf stat -r 10 cat target/benchmarks/alt-screen-random-write.vte
+hyperfine --show-output "cat target/benchmarks/scrolling.vte"
 ```
 
-In the future, it would be nice to have a script to automate generating all of
-the tests, running them several times and generate statistics, and print all the
-results in a machine+human friendly format.
+Great instructions on how to reliably generate consistent benchmarks can be
+found in the [llvm documentation](https://llvm.org/docs/Benchmarking.html).
+Usually it is not required to limit execution to specific cores, but the other
+instructions will greatly help with consistency.
 
 ### The `-b|--bytes` flag
 
