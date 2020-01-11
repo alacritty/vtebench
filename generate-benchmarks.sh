@@ -23,6 +23,9 @@ function generate_benchmark {
     sleep "$timeout"
     pkill vtebench
 
+    # Wait for application to finish before writing to file
+    sleep 1
+
     # Since we kill the benchmark, we're doing the resetting ourself
     printf "\ec" >> "$file"
 }
