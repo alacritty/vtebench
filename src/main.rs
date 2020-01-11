@@ -21,9 +21,12 @@
 extern crate rand;
 extern crate structopt;
 
-#[macro_use] extern crate failure;
-#[macro_use] extern crate structopt_derive;
-#[macro_use] extern crate terminfo;
+#[macro_use]
+extern crate failure;
+#[macro_use]
+extern crate structopt_derive;
+#[macro_use]
+extern crate terminfo;
 
 use std::io::{self, BufWriter};
 
@@ -35,7 +38,7 @@ mod cli;
 mod context;
 mod result;
 
-use cli::{Options, Benchmark};
+use cli::{Benchmark, Options};
 use context::Context;
 use result::Result;
 

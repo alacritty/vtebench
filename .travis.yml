@@ -1,0 +1,57 @@
+language: rust
+
+addons:
+  apt:
+    packages:
+    - libxcb-xfixes0-dev
+
+git:
+  depth: 1
+
+os:
+  - linux
+  - osx
+
+rust:
+  - 1.36.0
+  - stable
+  - nightly
+
+matrix:
+  fast_finish: true
+  include:
+    - if: tag IS present
+      os: linux
+      rust: stable
+      env: ARCH=i386
+    - name: "Clippy Linux"
+      os: linux
+      env: CLIPPY=true
+      rust: stable
+    - name: "Clippy OSX"
+      os: osx
+      env: CLIPPY=true
+      rust: stable
+    - name: "Clippy Windows"
+      os: windows
+      env: CLIPPY=true
+      rust: stable-x86_64-pc-windows-msvc
+    - name: "Rustfmt"
+      os: linux
+      env: RUSTFMT=true
+      rust: nightly
+    - name: "Windows 1.36.0"
+      os: windows
+      rust: 1.36.0-x86_64-pc-windows-msvc
+    - name: "Windows Stable"
+      os: windows
+      rust: stable-x86_64-pc-windows-msvc
+    - name: "Windows Nightly"
+      os: windows
+      rust: nightly-x86_64-pc-windows-msvc
+  allow_failures:
+    - rust: nightly
+    - rust: nightly-x86_64-pc-windows-msvc
+
+install: ci/install.sh
+script: ci/script.sh

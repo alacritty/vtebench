@@ -33,7 +33,11 @@ pub struct Options {
     #[structopt(short = "c", help = "colorized output (not all tests support)")]
     pub colorize: bool,
 
-    #[structopt(long = "term", help = "terminal name (terminfo)", default_value = "xterm-256color")]
+    #[structopt(
+        long = "term",
+        help = "terminal name (terminfo)",
+        default_value = "xterm-256color"
+    )]
     pub term: String,
 
     #[structopt(subcommand)]
@@ -78,10 +82,7 @@ pub enum Benchmark {
         lines_from_bottom: u16,
     },
 
-    #[structopt(
-        name = "scrolling",
-        about = "Repeatedly outputs 'y\\n'"
-    )]
+    #[structopt(name = "scrolling", about = "Repeatedly outputs 'y\\n'")]
     Scrolling {
         #[structopt(long = "fill-lines", help = "fills lines instead of using y\\n")]
         fill_lines: bool,
