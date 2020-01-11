@@ -15,8 +15,8 @@ use std::io::Write;
 
 use rand::{self, Rng};
 
+use cli::{Benchmark, Options};
 use context::Context;
-use cli::{Options, Benchmark};
 use result::Result;
 
 static YES: &[u8] = b"\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
@@ -77,9 +77,9 @@ pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) ->
     let h = options.height;
 
     let (fill_lines, lines_from_top, lines_from_bottom) = match options.benchmark {
-        Benchmark::ScrollingInRegion { fill_lines, lines_from_top, lines_from_bottom } => (
-            fill_lines, lines_from_top, lines_from_bottom
-        ),
+        Benchmark::ScrollingInRegion { fill_lines, lines_from_top, lines_from_bottom } => {
+            (fill_lines, lines_from_top, lines_from_bottom)
+        },
         _ => panic!("Wrong benchmark"),
     };
 
@@ -137,7 +137,7 @@ pub fn unicode_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -
         }
 
         let unicode_value = rng.gen_range(0, u16::max_value());
-        let unicode = String::from_utf16_lossy(&vec![unicode_value]).into_bytes();
+        let unicode = String::from_utf16_lossy(&[unicode_value]).into_bytes();
         ctx.write_all(&unicode)?;
         written += unicode.len();
     }

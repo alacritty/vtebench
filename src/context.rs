@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use std::io::{self, Write};
-use terminfo::{Database, capability as cap};
+use terminfo::{capability as cap, Database};
 
 use rand::{self, Rng};
 
