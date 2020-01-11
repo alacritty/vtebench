@@ -42,7 +42,7 @@ pub fn alt_screen_random_write<W: Write>(ctx: &mut Context<W>, options: &Options
     ctx.smcup()?;
 
     while written < options.bytes {
-        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 2));
+        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 1));
         let space = w - c;
         let to_write = rng.gen_range(0, space);
 
@@ -129,7 +129,7 @@ pub fn unicode_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -
     let w = options.width;
 
     while written < options.bytes {
-        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 2));
+        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w - 1));
 
         written += ctx.cup(l, c)?;
         if options.colorize {
