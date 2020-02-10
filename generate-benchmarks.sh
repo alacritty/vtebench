@@ -11,9 +11,11 @@ function generate_benchmark {
 
     # All remaining parameters are benchmark parameters
     params=""
-    for i in $(seq 3 $#); do
-        params+="${!i} "
-    done
+    if [ $# -gt 2]; then
+      for i in $(seq 3 $#); do
+          params+="${!i} "
+      done
+    fi
 
     # Target file path
     file="$target_dir/$benchname.vte"
