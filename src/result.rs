@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use std::io;
-use terminfo;
+
+use failure::Fail;
 
 pub type Result<T> = ::std::result::Result<T, Error>;
 

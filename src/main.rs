@@ -18,16 +18,6 @@
 //! file can simply be `cat`ed from the terminal emulator under test. This
 //! ensures that the terminal is being benchmarked and not this vtebench
 //! application.
-extern crate rand;
-extern crate structopt;
-
-#[macro_use]
-extern crate failure;
-#[macro_use]
-extern crate structopt_derive;
-#[macro_use]
-extern crate terminfo;
-
 use std::io::{self, BufWriter};
 
 use structopt::StructOpt;

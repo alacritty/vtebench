@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use std::io::{self, Write};
-use terminfo::{capability as cap, Database};
 
-use rand::{self, Rng};
+use rand::rngs::ThreadRng;
+use rand::Rng;
+use terminfo::{capability as cap, expand, Database};
 
-use result::Result;
+use crate::result::Result;
 
 pub struct Context<'a, W: Write + 'a> {
     pub out: &'a mut W,
     pub db: &'a Database,
     pub buf: Vec<u8>,
-    pub rng: rand::ThreadRng,
+    pub rng: ThreadRng,
 }
 
 impl<'a, W: Write + 'a> Context<'a, W> {
