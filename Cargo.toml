@@ -1,6 +1,6 @@
 [package]
 name = "vtebench"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Christian Duerr <contact@christianduerr.com>", "Joe Wilm <joe@jwilm.com>"]
 license = "Apache-2.0"
 description = "Benchmark terminal emulators"
