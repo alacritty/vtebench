@@ -1,10 +1,10 @@
 [package]
 name = "vtebench"
 version = "0.1.2"
+authors = ["Christian Duerr <contact@christianduerr.com>", "Joe Wilm <joe@jwilm.com>"]
 license = "Apache-2.0"
-authors = ["Joe Wilm <joe@jwilm.com>"]
 description = "Benchmark terminal emulators"
-documentation = "https://docs.rs/vtebench"
+readme = "README.md"
 repository = "https://github.com/alacritty/vtebench"
 edition = "2018"
 
