@@ -13,11 +13,11 @@
 // limitations under the License.
 use std::io::Write;
 
-use rand::{self, Rng};
+use rand::Rng;
 
-use cli::{Benchmark, Options};
-use context::Context;
-use result::Result;
+use crate::cli::{Benchmark, Options};
+use crate::context::Context;
+use crate::result::Result;
 
 static YES: &[u8] = b"\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
     \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
