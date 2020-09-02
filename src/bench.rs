@@ -1,133 +1,317 @@
-use std::io::Write;
+//! Benchmark execution and analyzation.
 
-use rand::Rng;
+use std::cmp::min;
+use std::collections::HashMap;
+use std::error::Error as StdError;
+use std::ffi::OsStr;
+use std::fmt::{self, Display, Formatter};
+use std::io::{self, Write};
+use std::iter;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::time::{Duration, Instant};
 
-use crate::cli::{Benchmark, Options};
-use crate::context::Context;
-use crate::result::Result;
+use walkdir::WalkDir;
 
-static YES: &[u8] = b"\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\
-    \ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny";
+/// Errors during the benchmark process.
+#[derive(Debug)]
+pub enum Error {
+    /// No bytes are present in the benchmark.
+    Empty,
+}
 
-pub fn alt_screen_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
-    let mut written = 0;
-    let mut rng = rand::thread_rng();
-    let h = options.height;
-    let w = options.width;
+impl StdError for Error {}
 
-    ctx.smcup()?;
-
-    while written < options.bytes {
-        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w));
-        let space = w - c;
-        let to_write = rng.gen_range(0, space) + 1;
-
-        written += ctx.cup(l, c)?;
-        if options.colorize {
-            written += ctx.setaf(rng.gen_range(0, 8))?;
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            Error::Empty => write!(f, "empty benchmark"),
         }
-        written += ctx.write_ascii(to_write as _)?;
     }
-
-    ctx.sgr0()?;
-    ctx.rmcup()?;
-
-    Ok(written)
 }
 
-fn build_scroll_buf(fill: bool, cols: u16) -> Vec<u8> {
-    if fill {
-        let mut buf = Vec::new();
-        for _ in 0..(cols - 1) {
-            buf.push(b'a');
+/// Find all benchmarks recursively in the specified location.
+pub fn find_benchmarks<P: AsRef<Path>>(path: P) -> Vec<BenchmarkLoader> {
+    let mut benchmarks: HashMap<String, (Option<PathBuf>, Option<PathBuf>)> = HashMap::new();
+
+    for entry in WalkDir::new(path)
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.file_type().is_file())
+        .filter(|entry| entry.file_name() == "setup" || entry.file_name() == "benchmark")
+    {
+        let file_name = entry.file_name().to_string_lossy().into_owned();
+        let path = entry.into_path();
+
+        if let Some(name) = path.parent().and_then(|path| path.file_name()) {
+            let name = name.to_string_lossy().to_string();
+            let bench = benchmarks.entry(name).or_default();
+            match file_name.as_str() {
+                "setup" => bench.0 = Some(path),
+                "benchmark" => bench.1 = Some(path),
+                _ => unreachable!(),
+            }
         }
-        buf.push(b'\n');
-        buf
-    } else {
-        YES.to_owned()
+    }
+
+    benchmarks
+        .drain()
+        .filter_map(|(name, (setup_path, bench_path))| {
+            bench_path.map(|bench_path| BenchmarkLoader { name, setup_path, bench_path })
+        })
+        .collect()
+}
+
+/// Benchmark loader.
+///
+/// This loader stores all state necessary to initialize the benchmark, without allocating the
+/// entire benchmark ahead of execution.
+pub struct BenchmarkLoader {
+    setup_path: Option<PathBuf>,
+    bench_path: PathBuf,
+    name: String,
+}
+
+impl BenchmarkLoader {
+    /// Create the benchmark.
+    ///
+    /// This will allocate the necessary buffer to run the benchmark directly from memory.
+    pub fn load(self, min_bytes: usize) -> Result<Benchmark, Error> {
+        Benchmark::new(self.name, self.setup_path.as_ref(), self.bench_path, min_bytes)
     }
 }
 
-pub fn scrolling_in_region<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
-    let mut written = 0;
-    let h = options.height;
+/// A single benchmark with all data cached.
+pub struct Benchmark {
+    /// Benchmark initialization data.
+    setup: Vec<u8>,
 
-    let (fill_lines, lines_from_top, lines_from_bottom) = match options.benchmark {
-        Benchmark::ScrollingInRegion { fill_lines, lines_from_top, lines_from_bottom } => {
-            (fill_lines, lines_from_top, lines_from_bottom)
-        },
-        _ => panic!("Wrong benchmark"),
-    };
+    /// Benchmark execution data.
+    benchmark: Vec<u8>,
 
-    // First, setup the scroll region. Use as many lines as there are available, less 1.
-    written += ctx.csr(lines_from_top, h - 2 - lines_from_bottom)?;
-    for i in 0..lines_from_bottom {
-        written += ctx.cup(h - 1 - i, 0)?;
-        let message = format!("REGION BOTTOM {}", i);
-        ctx.write_all(&message.into_bytes())?;
-    }
-    written += ctx.cup(lines_from_top, 0)?;
-
-    let buf = build_scroll_buf(fill_lines, options.width);
-    while written < options.bytes {
-        ctx.write_all(&buf)?;
-        written += buf.len();
-    }
-
-    ctx.csr(0, h)?;
-    ctx.sgr0()?;
-
-    Ok(written)
+    /// Name of the benchmark.
+    name: String,
 }
 
-pub fn scrolling<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
-    let mut written = 0;
+impl Benchmark {
+    /// Load a benchmark.
+    ///
+    /// If the benchmark is too small, it will be repeated in full until the `min_bytes` parameter
+    /// is reached or exceeded.
+    pub fn new<SP, BP>(
+        name: String,
+        setup_path: Option<SP>,
+        bench_path: BP,
+        min_bytes: usize,
+    ) -> Result<Self, Error>
+    where
+        SP: AsRef<OsStr>,
+        BP: AsRef<OsStr>,
+    {
+        // Execute setup shell script and capture its output.
+        let setup = match setup_path {
+            Some(path) => Command::new(path).output().map(|out| out.stdout).unwrap_or_default(),
+            None => Vec::new(),
+        };
 
-    let fill_lines = match options.benchmark {
-        Benchmark::Scrolling { fill_lines } => fill_lines,
-        _ => panic!("Wrong benchmark"),
-    };
+        // Execute benchmark shell script and capture its output.
+        let bench = Command::new(bench_path).output().map(|out| out.stdout).unwrap_or_default();
 
-    let buf = build_scroll_buf(fill_lines, options.width);
-    while written < options.bytes {
-        ctx.write_all(&buf)?;
-        written += buf.len();
-    }
-    ctx.sgr0()?;
-
-    Ok(written)
-}
-
-pub fn unicode_random_write<W: Write>(ctx: &mut Context<W>, options: &Options) -> Result<usize> {
-    let mut written = 0;
-    let mut rng = rand::thread_rng();
-    let h = options.height;
-    let w = options.width;
-
-    while written < options.bytes {
-        let (l, c) = (rng.gen_range(0, h), rng.gen_range(0, w));
-
-        written += ctx.cup(l, c)?;
-        if options.colorize {
-            written += ctx.setaf(rng.gen_range(0, 8))?;
+        // If there's no data, the minimum benchmark size cannot be reached.
+        if min_bytes == 0 || bench.is_empty() {
+            return Err(Error::Empty);
         }
 
-        let unicode_value = rng.gen_range(0, u16::max_value());
-        let unicode = String::from_utf16_lossy(&[unicode_value]).into_bytes();
-        ctx.write_all(&unicode)?;
-        written += unicode.len();
+        // Repeat until `min_bytes` is reached.
+        let count = (min_bytes - 1) / bench.len() + 1;
+        let bytes = iter::repeat(bench).take(count).flatten().collect();
+
+        Ok(Self { benchmark: bytes, setup, name })
     }
 
-    Ok(written)
+    /// Execute the benchmark.
+    ///
+    /// This will write the entire benchmark to STDOUT multiple times.
+    pub fn run(&self, warmup_runs: usize, max_secs: u64, max_runs: Option<usize>) -> Results {
+        // Lock stdout to ensure consistency.
+        let stdout = io::stdout();
+        let mut stdout = stdout.lock();
+
+        // Setup benchmark.
+        let _ = stdout.write_all(&self.setup);
+
+        // Write benchmark as warmup to fill PTY buffer.
+        for _ in 0..warmup_runs {
+            let _ = stdout.write_all(&self.benchmark);
+        }
+
+        let mut samples = Vec::new();
+
+        let max_runs = max_runs.unwrap_or(usize::max_value());
+        let end = Instant::now() + Duration::from_secs(max_secs);
+        for _ in (0..max_runs).take_while(|_| Instant::now() < end) {
+            // Measure for how long `write_all` blocks.
+            let start = Instant::now();
+            let _ = stdout.write_all(&self.benchmark);
+            let duration = Instant::now() - start;
+
+            samples.push(duration.as_millis() as usize);
+        }
+
+        // Reset.
+        let _ = stdout.write_all(b"\x1bc");
+
+        Results::new(self.name.clone(), self.benchmark.len(), samples)
+    }
+}
+
+/// Benchmark results.
+pub struct Results {
+    /// Sorted samples for calculations like median.
+    sorted_samples: Vec<usize>,
+
+    /// Samples ordered chronologically.
+    samples: Vec<usize>,
+
+    /// Number of bytes in one iteration of the benchmark.
+    bench_size: usize,
+
+    /// Name of the benchmark.
+    name: String,
+}
+
+impl Results {
+    pub fn new(name: String, bench_size: usize, mut samples: Vec<usize>) -> Self {
+        // Assure the vector is never empty to simplify the math.
+        if samples.is_empty() {
+            samples.push(0);
+        }
+
+        let mut sorted_samples = samples.clone();
+        sorted_samples.sort_unstable();
+
+        Results { sorted_samples, samples, bench_size, name }
+    }
+
+    /// Name of the benchmark.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// All recorded samples.
+    pub fn samples(&self) -> &[usize] {
+        self.samples.as_slice()
+    }
+
+    /// Size of the benchmark in bytes.
+    pub fn bench_size(&self) -> usize {
+        self.bench_size
+    }
+
+    /// Number of samples taken.
+    pub fn sample_count(&self) -> usize {
+        self.samples.len()
+    }
+
+    /// Mean execution time per sample in milliseconds.
+    pub fn mean(&self) -> f64 {
+        self.samples.iter().sum::<usize>() as f64 / self.samples.len() as f64
+    }
+
+    /// Median execution time per sample in milliseconds.
+    pub fn median(&self) -> f64 {
+        let len = self.samples.len();
+        (self.sorted_samples[(len - 1) / 2] as f64 + self.sorted_samples[len / 2] as f64) / 2.
+    }
+
+    /// Variance of the execution time in milliseconds.
+    pub fn variance(&self) -> f64 {
+        if self.samples.len() < 2 {
+            return 0.;
+        }
+
+        let last_index = (self.samples.len() - 1) as f64;
+        let mean = self.mean() as f64;
+        self.samples.iter().map(|&s| f64::powi(s as f64 - mean, 2)).sum::<f64>() / last_index
+    }
+
+    /// Standard deviation of the execution time in milliseconds.
+    pub fn stddev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+
+    /// Execution time in millisecond that the specified percentage of samples lie below.
+    pub fn percentile(&self, mut percentile: usize) -> usize {
+        percentile = min(percentile, 100);
+
+        let index = ((self.samples.len() * percentile + 99) / 100).saturating_sub(1);
+        self.sorted_samples[index]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::f64;
+
+    #[test]
+    fn mean() {
+        let results = new_results(vec![20, 30, 40, 80, 100, 100]);
+        float_eq(results.mean(), 61.666666666666664);
+    }
+
+    #[test]
+    fn median() {
+        let results = new_results(vec![20, 30, 55, 60, 100, 100]);
+        float_eq(results.median(), 57.5);
+
+        let results = new_results(vec![20, 30, 40, 60, 80, 100, 100]);
+        float_eq(results.median(), 60.);
+    }
+
+    #[test]
+    fn variance() {
+        let results = new_results(vec![4, 8, 8, 8, 10, 10]);
+        float_eq(results.variance(), 4.8);
+
+        let results = new_results(vec![3]);
+        float_eq(results.variance(), 0.);
+    }
+
+    #[test]
+    fn stddev() {
+        let results = new_results(vec![4, 8, 8, 8, 10, 10]);
+        float_eq(results.stddev(), 2.1908902300206643);
+
+        let results = new_results(vec![3]);
+        float_eq(results.stddev(), 0.);
+    }
+
+    #[test]
+    fn percentile() {
+        let results = new_results(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        assert_eq!(results.percentile(110), 10);
+        assert_eq!(results.percentile(100), 10);
+        assert_eq!(results.percentile(90), 9);
+        assert_eq!(results.percentile(80), 8);
+        assert_eq!(results.percentile(70), 7);
+        assert_eq!(results.percentile(60), 6);
+        assert_eq!(results.percentile(50), 5);
+        assert_eq!(results.percentile(40), 4);
+        assert_eq!(results.percentile(30), 3);
+        assert_eq!(results.percentile(20), 2);
+        assert_eq!(results.percentile(10), 1);
+        assert_eq!(results.percentile(0), 1);
+    }
+
+    fn new_results(samples: Vec<usize>) -> Results {
+        Results { sorted_samples: samples.clone(), samples, bench_size: 0, name: String::new() }
+    }
+
+    fn float_eq(f1: f64, f2: f64) {
+        if (f1 - f2).abs() >= f64::EPSILON {
+            panic!("float assertion failed: {} != {}", f1, f2);
+        }
+    }
 }
