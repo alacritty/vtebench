@@ -1,6 +1,6 @@
 [package]
 name = "vtebench"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Christian Duerr <contact@christianduerr.com>", "Joe Wilm <joe@jwilm.com>"]
 license = "Apache-2.0"
 description = "Benchmark terminal emulators"
@@ -9,8 +9,5 @@ repository = "https://github.com/alacritty/vtebench"
 edition = "2018"
 
 [dependencies]
-structopt-derive = "0.4.9"
-structopt = "0.3.16"
-terminfo = "0.7.3"
-failure = "0.1.8"
-rand = "0.7.3"
+structopt = "0.3.17"
+walkdir = "2.3.1"

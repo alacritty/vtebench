@@ -1,78 +1,33 @@
+//! CLI parameter parsing.
+
+use std::path::PathBuf;
+
 use structopt::StructOpt;
 
-/// Command line options
-#[derive(StructOpt, Debug)]
-#[structopt(name = "vtebench", about = "Benchmark Terminal Emulators")]
-pub struct Options {
-    #[structopt(short = "w", help = "width of terminal", default_value = "80")]
-    pub width: u16,
+#[derive(StructOpt)]
+#[structopt(author)]
+pub struct Config {
+    /// Do not print results to stdout.
+    #[structopt(long)]
+    pub silent: bool,
 
-    #[structopt(short = "h", help = "height of terminal", default_value = "24")]
-    pub height: u16,
+    /// Minimum number of bytes per benchmark iteration.
+    #[structopt(long, value_name = "BYTES", default_value = "1048576")]
+    pub min_bytes: usize,
 
-    #[structopt(
-        short = "b",
-        long = "bytes",
-        help = "minimum bytes to output; actual value may be slightly higher",
-        default_value = "1048576"
-    )]
-    pub bytes: usize,
+    /// Maximum number of iterations per benchmark.
+    #[structopt(long, value_name = "NUM")]
+    pub max_runs: Option<usize>,
 
-    #[structopt(short = "c", help = "colorized output (not all tests support)")]
-    pub colorize: bool,
+    /// Maximum number of seconds per benchmark.
+    #[structopt(long, value_name = "SECONDS", default_value = "10")]
+    pub max_secs: u64,
 
-    #[structopt(
-        long = "term",
-        help = "terminal name (terminfo)",
-        default_value = "xterm-256color"
-    )]
-    pub term: String,
+    /// Benchmark source directory.
+    #[structopt(short, long, value_name = "DIRECTORY", default_value = "./benchmarks")]
+    pub benchmarks: PathBuf,
 
-    #[structopt(subcommand)]
-    pub benchmark: Benchmark,
-}
-
-#[derive(StructOpt, Debug)]
-#[structopt(name = "vtebench", about = "Benchmark Terminal Emulators")]
-pub enum Benchmark {
-    #[structopt(
-        name = "alt-screen-random-write",
-        about = "Set alt screen; repeatedly: pick random location, write ascii"
-    )]
-    AltScreenRandomWrite,
-
-    #[structopt(
-        name = "unicode-random-write",
-        about = "Repeatedly picks location and writes unicode character"
-    )]
-    UnicodeRandomWrite,
-
-    #[structopt(
-        name = "scrolling-in-region",
-        about = "Repeatedly outputs 'y\\n' within a scrolling region"
-    )]
-    ScrollingInRegion {
-        #[structopt(long = "fill-lines", help = "fills lines instead of using y\\n")]
-        fill_lines: bool,
-
-        #[structopt(
-            long = "lines-from-top",
-            help = "how far scrolling region extends from top",
-            default_value = "0"
-        )]
-        lines_from_top: u16,
-
-        #[structopt(
-            long = "lines-from-bottom",
-            help = "how far scrolling region extends from bottom",
-            default_value = "0"
-        )]
-        lines_from_bottom: u16,
-    },
-
-    #[structopt(name = "scrolling", about = "Repeatedly outputs 'y\\n'")]
-    Scrolling {
-        #[structopt(long = "fill-lines", help = "fills lines instead of using y\\n")]
-        fill_lines: bool,
-    },
+    /// Number of warmup runs.
+    #[structopt(long, value_name = "NUM", default_value = "1")]
+    pub warmup: usize,
 }
