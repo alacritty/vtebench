@@ -15,17 +15,17 @@ pub struct Config {
     #[structopt(short, long, value_name = "DIRECTORY", default_value = "./benchmarks")]
     pub benchmarks: PathBuf,
 
-    /// Number of warmup runs.
+    /// Number of warmup iterations.
     #[structopt(long, value_name = "NUM", default_value = "1")]
     pub warmup: usize,
 
-    /// Minimum number of bytes per benchmark iteration.
+    /// Minimum number of bytes per benchmark sample.
     #[structopt(long, value_name = "BYTES", default_value = "1048576")]
     pub min_bytes: usize,
 
-    /// Maximum number of iterations per benchmark.
+    /// Maximum number of samples per benchmark.
     #[structopt(long, value_name = "NUM")]
-    pub max_runs: Option<usize>,
+    pub max_samples: Option<usize>,
 
     /// Maximum number of seconds per benchmark.
     #[structopt(long, value_name = "SECONDS", default_value = "10")]

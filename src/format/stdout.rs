@@ -18,7 +18,7 @@ impl Format for StdoutFormat {
             let stddev = float_fmt(result.stddev(), 2);
             let median = float_fmt(result.median(), 2);
 
-            println!("  {} ({} runs @ {} MiB):", result.name(), sample_count, size_mib);
+            println!("  {} ({} samples @ {} MiB):", result.name(), sample_count, size_mib);
             println!("    {}ms median (90% < {}ms) +-{}ms", median, percentile, stddev);
         }
     }
