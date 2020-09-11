@@ -1,3 +1,5 @@
+#![deny(clippy::all)]
+
 use structopt::StructOpt;
 
 mod bench;
@@ -6,8 +8,7 @@ mod format;
 
 use crate::bench::Results;
 use crate::cli::Config;
-use crate::format::stdout::StdoutFormat;
-use crate::format::Format;
+use crate::format::{DatFormat, Format, StdoutFormat};
 
 fn main() {
     // Parse CLI parameters.
@@ -23,8 +24,13 @@ fn main() {
         .map(|bench| bench.run(config.warmup, config.max_secs, config.max_runs))
         .collect();
 
-    // Write to stdout.
+    // Output results in various formats based on CLI config.
+
     if !config.silent {
         StdoutFormat.format(&results);
+    }
+
+    if let Some(path) = config.dat {
+        DatFormat::new(path).format(&results);
     }
 }

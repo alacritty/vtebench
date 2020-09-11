@@ -1,6 +1,10 @@
 //! Benchmark output formats.
 
-pub mod stdout;
+mod dat;
+mod stdout;
+
+pub use crate::format::dat::DatFormat;
+pub use crate::format::stdout::StdoutFormat;
 
 use crate::bench::Results;
 
