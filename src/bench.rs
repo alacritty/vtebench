@@ -153,6 +153,7 @@ impl Benchmark {
             // Measure for how long `write_all` blocks.
             let start = Instant::now();
             let _ = stdout.write_all(&self.benchmark);
+            let _ = stdout.flush();
             let duration = Instant::now() - start;
 
             samples.push(duration.as_millis() as usize);
@@ -160,6 +161,7 @@ impl Benchmark {
 
         // Reset.
         let _ = stdout.write_all(b"\x1bc");
+        let _ = stdout.flush();
 
         Results::new(self.name.clone(), self.benchmark.len(), samples)
     }
@@ -180,6 +182,7 @@ pub struct Results {
     name: String,
 }
 
+#[allow(unused)]
 impl Results {
     pub fn new(name: String, bench_size: usize, mut samples: Vec<usize>) -> Self {
         // Assure the vector is never empty to simplify the math.
@@ -211,6 +214,16 @@ impl Results {
     /// Number of samples taken.
     pub fn sample_count(&self) -> usize {
         self.samples.len()
+    }
+
+    /// Fastest benchmark iteration in milliseconds.
+    pub fn min(&self) -> usize {
+        self.samples.iter().min().copied().unwrap_or_default()
+    }
+
+    /// Slowest benchmark iteration in milliseconds.
+    pub fn max(&self) -> usize {
+        self.samples.iter().max().copied().unwrap_or_default()
     }
 
     /// Mean execution time per sample in milliseconds.
@@ -254,6 +267,18 @@ mod tests {
     use super::*;
 
     use std::f64;
+
+    #[test]
+    fn max() {
+        let results = new_results(vec![6, 3, 1, 9, 8]);
+        assert_eq!(results.max(), 9);
+    }
+
+    #[test]
+    fn min() {
+        let results = new_results(vec![6, 3, 1, 9, 8]);
+        assert_eq!(results.min(), 1);
+    }
 
     #[test]
     fn mean() {
