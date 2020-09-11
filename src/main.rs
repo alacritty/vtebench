@@ -21,7 +21,7 @@ fn main() {
     let results: Vec<Results> = loaders
         .drain(..)
         .filter_map(|loader| loader.load(config.min_bytes).ok())
-        .map(|bench| bench.run(config.warmup, config.max_secs, config.max_runs))
+        .map(|bench| bench.run(config.warmup, config.max_secs, config.max_samples))
         .collect();
 
     // Output results in various formats based on CLI config.

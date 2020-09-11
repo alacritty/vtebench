@@ -132,7 +132,7 @@ impl Benchmark {
     /// Execute the benchmark.
     ///
     /// This will write the entire benchmark to STDOUT multiple times.
-    pub fn run(&self, warmup_runs: usize, max_secs: u64, max_runs: Option<usize>) -> Results {
+    pub fn run(&self, warmup_runs: usize, max_secs: u64, max_samples: Option<usize>) -> Results {
         // Lock stdout to ensure consistency.
         let stdout = io::stdout();
         let mut stdout = stdout.lock();
@@ -147,9 +147,9 @@ impl Benchmark {
 
         let mut samples = Vec::new();
 
-        let max_runs = max_runs.unwrap_or(usize::max_value());
+        let max_samples = max_samples.unwrap_or(usize::max_value());
         let end = Instant::now() + Duration::from_secs(max_secs);
-        for _ in (0..max_runs).take_while(|_| Instant::now() < end) {
+        for _ in (0..max_samples).take_while(|_| Instant::now() < end) {
             // Measure for how long `write_all` blocks.
             let start = Instant::now();
             let _ = stdout.write_all(&self.benchmark);
@@ -175,7 +175,7 @@ pub struct Results {
     /// Samples ordered chronologically.
     samples: Vec<usize>,
 
-    /// Number of bytes in one iteration of the benchmark.
+    /// Number of bytes in one sample of the benchmark.
     bench_size: usize,
 
     /// Name of the benchmark.
@@ -216,12 +216,12 @@ impl Results {
         self.samples.len()
     }
 
-    /// Fastest benchmark iteration in milliseconds.
+    /// Fastest benchmark sample in milliseconds.
     pub fn min(&self) -> usize {
         self.samples.iter().min().copied().unwrap_or_default()
     }
 
-    /// Slowest benchmark iteration in milliseconds.
+    /// Slowest benchmark sample in milliseconds.
     pub fn max(&self) -> usize {
         self.samples.iter().max().copied().unwrap_or_default()
     }
