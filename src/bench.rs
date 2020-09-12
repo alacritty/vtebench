@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::error::Error as StdError;
 use std::ffi::OsStr;
 use std::fmt::{self, Display, Formatter};
-use std::io::{self, Write};
+use std::io::{self, StdoutLock, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -137,12 +137,9 @@ impl Benchmark {
         let stdout = io::stdout();
         let mut stdout = stdout.lock();
 
-        // Setup benchmark.
-        let _ = stdout.write_all(&self.setup);
-
         // Write benchmark as warmup to fill PTY buffer.
         for _ in 0..warmup_runs {
-            let _ = stdout.write_all(&self.benchmark);
+            self.run_sample(&mut stdout);
         }
 
         let mut samples = Vec::new();
@@ -150,12 +147,7 @@ impl Benchmark {
         let max_samples = max_samples.unwrap_or(usize::max_value());
         let end = Instant::now() + Duration::from_secs(max_secs);
         for _ in (0..max_samples).take_while(|_| Instant::now() < end) {
-            // Measure for how long `write_all` blocks.
-            let start = Instant::now();
-            let _ = stdout.write_all(&self.benchmark);
-            let _ = stdout.flush();
-            let duration = Instant::now() - start;
-
+            let duration = self.run_sample(&mut stdout);
             samples.push(duration.as_millis() as usize);
         }
 
@@ -164,6 +156,24 @@ impl Benchmark {
         let _ = stdout.flush();
 
         Results::new(self.name.clone(), self.benchmark.len(), samples)
+    }
+
+    /// Run a single benchmark sample.
+    fn run_sample(&self, stdout: &mut StdoutLock) -> Duration {
+        // Reset everything before starting.
+        let _ = stdout.write_all(b"\x1bc");
+        let _ = stdout.flush();
+
+        // Setup benchmark.
+        let _ = stdout.write_all(&self.setup);
+
+        // Execute the benchmark.
+        let start = Instant::now();
+        let _ = stdout.write_all(&self.benchmark);
+        let _ = stdout.flush();
+
+        // Measure how long the writing blocked for.
+        Instant::now() - start
     }
 }
 
