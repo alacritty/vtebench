@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Update the entire grid as often as possible without scrolling.
+
+columns=$(tput cols)
+lines=$(tput lines)
+
+for char in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+    printf "\e[H"
+    for _ in $(seq $columns); do
+        for _ in $(seq $lines); do
+            printf $char
+        done
+    done
+done

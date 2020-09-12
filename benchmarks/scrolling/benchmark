@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Scroll all lines up as quickly as possible.
+
+printf "y\n"

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Write a ton of different unicode symbols.
+
+cat "$(dirname $0)/symbols"

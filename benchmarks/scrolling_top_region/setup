@@ -1,0 +1,3 @@
+#!/bin/sh
+
+printf "\e[?1049h\e[2;$(tput lines)r"
