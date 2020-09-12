@@ -1,0 +1,5 @@
+#!/bin/sh
+
+lines=$(tput lines)
+
+printf "\e[?1049h\e[1;$((lines - 1))r"

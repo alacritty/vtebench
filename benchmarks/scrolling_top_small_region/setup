@@ -1,0 +1,5 @@
+#!/bin/sh
+
+lines=$(tput lines)
+
+printf "\e[?1049h\e[$((lines / 2));${lines}r"

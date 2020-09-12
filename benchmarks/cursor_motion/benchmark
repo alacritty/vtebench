@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Move cursor around for every single write.
+
+columns=$(tput cols)
+lines=$(tput lines)
+
+for char in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+    column_start=1
+    column_end=$columns
+
+    line_start=1
+    line_end=$lines
+
+    while true; do
+        column=$column_start
+        line=$line_start
+
+        while [ $column -lt $column_end ]; do
+            printf "\e[${line};${column}H$char"
+            column=$((column + 1))
+        done
+
+        while [ $line -lt $line_end ]; do
+            printf "\e[${line};${column}H$char"
+            line=$((line + 1))
+        done
+
+        while [ $column -gt $column_start ]; do
+            printf "\e[${line};${column}H$char"
+            column=$((column - 1))
+        done
+
+        while [ $line -gt $line_start ]; do
+            printf "\e[${line};${column}H$char"
+            line=$((line - 1))
+        done
+
+        alphabet_index=$((alphabet_index + 1))
+        column_start=$((column_start + 1))
+        line_start=$((line_start + 1))
+        column_end=$((column_end - 1))
+        line_end=$((line_end - 1))
+
+        if [ $column_start -gt $column_end ] || [ $line_start -gt $line_end ]; then
+            break
+        fi
+    done
+done

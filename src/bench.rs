@@ -35,6 +35,7 @@ pub fn find_benchmarks<P: AsRef<Path>>(path: P) -> Vec<BenchmarkLoader> {
     let mut benchmarks: HashMap<String, (Option<PathBuf>, Option<PathBuf>)> = HashMap::new();
 
     for entry in WalkDir::new(path)
+        .follow_links(true)
         .into_iter()
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.file_type().is_file())
