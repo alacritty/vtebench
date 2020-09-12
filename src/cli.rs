@@ -11,9 +11,9 @@ pub struct Config {
     #[structopt(short, long)]
     pub silent: bool,
 
-    /// Benchmark source directory.
+    /// Benchmark source directories.
     #[structopt(short, long, value_name = "DIRECTORY", default_value = "./benchmarks")]
-    pub benchmarks: PathBuf,
+    pub benchmarks: Vec<PathBuf>,
 
     /// Number of warmup iterations.
     #[structopt(long, value_name = "NUM", default_value = "1")]

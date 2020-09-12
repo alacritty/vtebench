@@ -7,7 +7,7 @@ use std::ffi::OsStr;
 use std::fmt::{self, Display, Formatter};
 use std::io::{self, StdoutLock, Write};
 use std::iter;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
@@ -31,26 +31,28 @@ impl Display for Error {
 }
 
 /// Find all benchmarks recursively in the specified location.
-pub fn find_benchmarks<P: AsRef<Path>>(path: P) -> Vec<BenchmarkLoader> {
+pub fn find_benchmarks(paths: &[PathBuf]) -> Vec<BenchmarkLoader> {
     let mut benchmarks: HashMap<String, (Option<PathBuf>, Option<PathBuf>)> = HashMap::new();
 
-    for entry in WalkDir::new(path)
-        .follow_links(true)
-        .into_iter()
-        .filter_map(|entry| entry.ok())
-        .filter(|entry| entry.file_type().is_file())
-        .filter(|entry| entry.file_name() == "setup" || entry.file_name() == "benchmark")
-    {
-        let file_name = entry.file_name().to_string_lossy().into_owned();
-        let path = entry.into_path();
+    for path in paths {
+        for entry in WalkDir::new(path)
+            .follow_links(true)
+            .into_iter()
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| entry.file_type().is_file())
+            .filter(|entry| entry.file_name() == "setup" || entry.file_name() == "benchmark")
+        {
+            let file_name = entry.file_name().to_string_lossy().into_owned();
+            let path = entry.into_path();
 
-        if let Some(name) = path.parent().and_then(|path| path.file_name()) {
-            let name = name.to_string_lossy().to_string();
-            let bench = benchmarks.entry(name).or_default();
-            match file_name.as_str() {
-                "setup" => bench.0 = Some(path),
-                "benchmark" => bench.1 = Some(path),
-                _ => unreachable!(),
+            if let Some(name) = path.parent().and_then(|path| path.file_name()) {
+                let name = name.to_string_lossy().to_string();
+                let bench = benchmarks.entry(name).or_default();
+                match file_name.as_str() {
+                    "setup" => bench.0 = Some(path),
+                    "benchmark" => bench.1 = Some(path),
+                    _ => unreachable!(),
+                }
             }
         }
     }
