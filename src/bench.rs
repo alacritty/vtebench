@@ -57,12 +57,18 @@ pub fn find_benchmarks(paths: &[PathBuf]) -> Vec<BenchmarkLoader> {
         }
     }
 
-    benchmarks
+    // Combine name/setup/benchmark into a single benchmark loader.
+    let mut benchmarks: Vec<BenchmarkLoader> = benchmarks
         .drain()
         .filter_map(|(name, (setup_path, bench_path))| {
             bench_path.map(|bench_path| BenchmarkLoader { name, setup_path, bench_path })
         })
-        .collect()
+        .collect();
+
+    // Sort benchmarks to ensure consistent order.
+    benchmarks.sort_unstable_by(|a, b| a.name.cmp(&b.name));
+
+    benchmarks
 }
 
 /// Benchmark loader.
