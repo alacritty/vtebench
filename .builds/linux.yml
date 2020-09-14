@@ -14,7 +14,7 @@ tasks:
       $HOME/.cargo/bin/rustup toolchain install nightly -c rustfmt
       cd vtebench
       $HOME/.cargo/bin/cargo +nightly fmt -- --check
-  - 1-36-0: |
-      $HOME/.cargo/bin/rustup toolchain install --profile minimal 1.36.0
+  - 1-41-0: |
+      $HOME/.cargo/bin/rustup toolchain install --profile minimal 1.41.0
       cd vtebench
-      $HOME/.cargo/bin/cargo +1.36.0 test
+      $HOME/.cargo/bin/cargo +1.41.0 test
