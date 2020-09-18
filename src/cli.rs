@@ -1,4 +1,4 @@
-//! CLI parameter parsing.
+//! CLI argument parsing.
 
 use std::path::PathBuf;
 

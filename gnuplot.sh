@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Make sure gnuplot is installed.
 if ! [ -x "$(command -v gnuplot)" ]; then
-    echo "Please install gnuplot"
+    echo "command not found: gnuplot"
     exit 1
 fi
 

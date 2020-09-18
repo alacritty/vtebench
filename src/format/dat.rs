@@ -17,7 +17,7 @@ impl DatFormat {
         Self { path }
     }
 
-    fn write(&self, results: &[Results]) -> Result<(), io::Error> {
+    fn write(&self, results: &[Results]) -> io::Result<()> {
         let text = results_to_cols(results);
         let mut file = File::create(&self.path)?;
         file.write_all(text.as_bytes())
