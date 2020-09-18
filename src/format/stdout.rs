@@ -16,10 +16,10 @@ impl Format for StdoutFormat {
             let sample_count = result.sample_count();
             let percentile = result.percentile(90);
             let stddev = float_fmt(result.stddev(), 2);
-            let median = float_fmt(result.median(), 2);
+            let mean = float_fmt(result.mean(), 2);
 
             println!("  {} ({} samples @ {} MiB):", result.name(), sample_count, size_mib);
-            println!("    {}ms median (90% < {}ms) +-{}ms", median, percentile, stddev);
+            println!("    {}ms avg (90% < {}ms) +-{}ms", mean, percentile, stddev);
         }
     }
 }
