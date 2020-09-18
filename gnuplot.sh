@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+# Plot every sample of all benchmarks.
+
 # Make sure gnuplot is installed.
 if ! [ -x "$(command -v gnuplot)" ]; then
     echo "command not found: gnuplot"
@@ -18,8 +20,8 @@ output_file=${!output_index}
 
 # Setup gnuplot script with output format and file.
 gnuplot_script="\
-set terminal svg noenhanced\n\
-set output \"${output_file}\"\n\
+set terminal svg noenhanced size 1000,750
+set output \"${output_file}\"
 set xlabel \"samples\"
 set ylabel \"milliseconds (lower is better)\"
 plot "
@@ -28,7 +30,11 @@ plot "
 for input_index in $(seq 1 $(($# - 1))); do
     input_file=${!input_index}
     num_cols=$(cat "$input_file" | head -n 1 | awk '{ print NF }')
-    gnuplot_script+="for[col = 1:${num_cols}] \"$input_file\" using col with linespoint title \"$input_file: \".columnhead(col),"
+    gnuplot_script+="for[col = 1:${num_cols}] \
+        \"$input_file\" \
+        using col \
+        with linespoint \
+        title \"$input_file: \".columnhead(col),"
 done
 gnuplot_script=${gnuplot_script::-1}
 
