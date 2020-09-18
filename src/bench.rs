@@ -86,6 +86,7 @@ impl BenchmarkLoader {
     ///
     /// This will allocate the necessary buffer to run the benchmark directly from memory.
     pub fn load(self, min_bytes: usize) -> Result<Benchmark, Error> {
+        println!("Loading {}...", self.name);
         Benchmark::new(self.name, self.setup_path.as_ref(), self.bench_path, min_bytes)
     }
 }
