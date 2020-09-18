@@ -6,7 +6,7 @@ A tool for benchmarking terminal emulator PTY read performance.
 
 This benchmark is not sufficient to get a general understanding of the
 performance of a terminal emulator. It lacks support for critical factors like
-framerate or latency. The only factor this benchmark stresses is the speed at
+frame rate or latency. The only factor this benchmark stresses is the speed at
 which a terminal reads from the PTY. If you do not understand what this means,
 please do not jump to any conclusions from the results of this benchmark.
 
@@ -52,8 +52,8 @@ If you have found benchmarks that might provide insightful information, or show
 significant differences between different terminals and version, you can send a
 pull request to add them to the default benchmark collection.
 
-To do so, you just need to create a new directory in the `./Benchmarks`
-directory and add an executable for your `setup` and `benchmark` functions.
-The stdout of the benchmark will automatically be repeated to fill a reasonable
-minimum sample size, so make sure to take that into account and move everything
-into `setup` that should only be done once.
+To do so, you just need to create a new directory in the `./benchmarks`
+directory and add a `benchmark` and an optional `setup` executable. The stdout
+of the benchmark will automatically be repeated to fill a reasonable minimum
+sample size, so make sure to take that into account and move everything into
+`setup` that should only be done once.

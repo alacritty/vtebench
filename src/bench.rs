@@ -1,4 +1,4 @@
-//! Benchmark execution and analyzation.
+//! Benchmark execution and analysis.
 
 use std::cmp::min;
 use std::collections::HashMap;
@@ -23,7 +23,7 @@ pub enum Error {
 impl StdError for Error {}
 
 impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Error::Empty => write!(f, "empty benchmark"),
         }
@@ -262,9 +262,9 @@ impl Results {
             return 0.;
         }
 
-        let last_index = (self.samples.len() - 1) as f64;
         let mean = self.mean() as f64;
-        self.samples.iter().map(|&s| f64::powi(s as f64 - mean, 2)).sum::<f64>() / last_index
+        let len = self.samples.len();
+        self.samples.iter().map(|&s| f64::powi(s as f64 - mean, 2)).sum::<f64>() / (len - 1) as f64
     }
 
     /// Standard deviation of the execution time in milliseconds.
