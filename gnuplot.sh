@@ -20,7 +20,7 @@ output_file=${!output_index}
 
 # Setup gnuplot script with output format and file.
 gnuplot_script="\
-set terminal svg noenhanced size 1000,750
+set terminal svg noenhanced size 1000,750 background rgb 'white'
 set output \"${output_file}\"
 set xlabel \"samples\"
 set ylabel \"milliseconds (lower is better)\"
