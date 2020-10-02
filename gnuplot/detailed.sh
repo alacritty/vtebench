@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Plot all benchmarks in separate SVGs.
+# Plot all benchmarks as separate SVGs.
 
 # Make sure gnuplot is installed.
 if ! [ -x "$(command -v gnuplot)" ]; then
@@ -10,22 +10,21 @@ fi
 
 # Ensure at least one input and output file is present.
 if [ $# -lt 2 ]; then
-    echo "Usage: gnuplot.sh <INPUT_FILES>... <OUTPUT_FILE>"
+    echo "Usage: gnuplot.sh <INPUT_FILES>... <OUTPUT_DIRECTORY>"
     exit 1
 fi
 
-# Get last argument as output file with the `.svg` suffix removed.
+# Get last argument as output directory.
 output_index=$#
-output_name=${!output_index}
-output_nosuffix=${output_name%.svg}
-output_suffix=${output_name##$output_nosuffix}
+output_directory=${!output_index%/}
+mkdir -p "$output_directory"
 
 num_cols=$(cat "$1" | head -n 1 | awk '{ print NF }')
 
 for col in $(seq 1 $num_cols); do
     # Append benchmark name before file suffix.
     benchmark=$(cat "$1" | head -n 1 | awk "{ print \$$col }")
-    output_file="${output_nosuffix}_${benchmark}${output_suffix}"
+    output_file="${output_directory}/${benchmark}.svg"
 
     # Setup gnuplot script with output format and file.
     gnuplot_script="\
