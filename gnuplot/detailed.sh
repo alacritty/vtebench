@@ -19,7 +19,7 @@ output_index=$#
 output_directory=${!output_index%/}
 mkdir -p "$output_directory"
 
-num_cols=$(cat "$1" | head -n 1 | awk '{ print NF }')
+num_cols=$(cat "$1" | head -n 1 | wc -w)
 
 for col in $(seq 1 $num_cols); do
     # Append benchmark name before file suffix.
