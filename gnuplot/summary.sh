@@ -60,7 +60,7 @@ gnuplot_script+=$gnuplot_tics
 gnuplot_script+="plot "
 for input_index in $(seq 1 $num_inputs); do
     input_file=${!input_index}
-    num_cols=$(cat "$input_file" | head -n 1 | awk '{ print NF }')
+    num_cols=$(cat "$input_file" | head -n 1 | wc -w)
     gnuplot_script+="for[col = 1:${num_cols}] \
         \"$input_file\" \
         using (col * $bench_width + $((box_width * (input_index - 1)))):col \
