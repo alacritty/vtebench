@@ -23,7 +23,7 @@ num_cols=$(cat "$1" | head -n 1 | wc -w)
 
 for col in $(seq 1 $num_cols); do
     # Append benchmark name before file suffix.
-    benchmark=$(cat "$1" | head -n 1 | awk "{ print \$$col }")
+    benchmark=$(cat "$1" | head -n 1 | cut -d ' ' -f $col)
     output_file="${output_directory}/${benchmark}.svg"
 
     # Setup gnuplot script with output format and file.
