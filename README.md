@@ -49,7 +49,6 @@ You can combine any number of results by passing them to the gnuplot script:
 And can plot detailed results using `detailed.sh`:
 
 ```
-mkdir output/
 ./gnuplot/detailed.sh *.dat output/
 ```
 
