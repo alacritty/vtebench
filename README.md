@@ -55,8 +55,8 @@ mkdir output/
 
 ### Requirements
 
-The scripts for plotting the benchmark data with `gnuplot` uses negative
-indexes for substrings. This was added in bash
+The scripts for plotting the benchmark data with `gnuplot` use negative
+indexes for substrings. This was added in `bash`
 [`4.2`](https://superuser.com/questions/1033273/bash-4-3-substring-negative-length-on-os-x#comment1442181_1033273).
 Ensure your version of bash is at least `4.2` by running:
 
