@@ -42,7 +42,7 @@ for col in $(seq 1 $num_cols); do
             with linespoint \
             title \"$input_file: \".columnhead($col),"
     done
-    gnuplot_script=${gnuplot_script::-1}
+    gnuplot_script=${gnuplot_script::${#gnuplot_script}-1}
 
     # Plot everything.
     echo -e "$gnuplot_script" | gnuplot

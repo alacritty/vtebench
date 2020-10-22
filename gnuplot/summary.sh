@@ -53,7 +53,7 @@ for column_label in $(cat "$1" | head -n 1); do
 
     index=$((index + 1))
 done
-gnuplot_tics="${gnuplot_tics::-1}) rotate by 315 left\n"
+gnuplot_tics="${gnuplot_tics::${#gnuplot_tics}-1}) rotate by 315 left\n"
 gnuplot_script+=$gnuplot_tics
 
 # Get the mean for all columns in every file.
@@ -67,7 +67,7 @@ for input_index in $(seq 1 $num_inputs); do
         title (col == 1 ? \"$input_file\" : \"\") \
         linecolor $input_index,"
 done
-gnuplot_script=${gnuplot_script::-1}
+gnuplot_script=${gnuplot_script::${#gnuplot_script}-1}
 
 # Plot everything.
 echo -e "$gnuplot_script" | gnuplot
