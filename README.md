@@ -33,17 +33,35 @@ To do this you first need to output the benchmark results in the `.dat` format:
 cargo run --release -- --dat results.dat
 ```
 
-After having generated the `.dat` file, you can then pass it to the `gnuplot.sh`
-script to generate the SVG plot:
+After having generated the `.dat` file, you can then pass it to a script in the
+`./gnuplot` directory script to generate the SVG plot:
 
 ```
-./gnuplot.sh results.dat output.svg
+./gnuplot/summary.sh results.dat output.svg
 ```
 
 You can combine any number of results by passing them to the gnuplot script:
 
 ```
-./gnuplot.sh *.dat output.svg
+./gnuplot/summary.sh *.dat output.svg
+```
+
+And can plot detailed results using `detailed.sh`:
+
+```
+mkdir output/
+./gnuplot/detailed.sh *.dat output/
+```
+
+### Requirements
+
+The scripts for plotting the benchmark data with `gnuplot` uses negative
+indexes for substrings. This was added in bash
+[`4.2`](https://superuser.com/questions/1033273/bash-4-3-substring-negative-length-on-os-x#comment1442181_1033273).
+Ensure your version of bash is at least `4.2` by running:
+
+```
+bash --version
 ```
 
 ## Contributing Benchmarks
