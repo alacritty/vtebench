@@ -34,7 +34,7 @@ cargo run --release -- --dat results.dat
 ```
 
 After having generated the `.dat` file, you can then pass it to a script in the
-`./gnuplot` directory script to generate the SVG plot:
+`./gnuplot` directory to generate the SVG plot:
 
 ```
 ./gnuplot/summary.sh results.dat output.svg
