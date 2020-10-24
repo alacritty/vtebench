@@ -1,0 +1,5 @@
+#!/bin/sh
+
+for _ in {0..100000}; do
+    printf "y\n"
+done
