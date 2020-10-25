@@ -7,13 +7,13 @@ gap_size=2
 
 # Make sure gnuplot is installed.
 if ! [ -x "$(command -v gnuplot)" ]; then
-    echo "command not found: gnuplot"
+    printf "command not found: gnuplot\n"
     exit 1
 fi
 
 # Ensure at least one input and output file is present.
 if [ $# -lt 2 ]; then
-    echo "Usage: gnuplot.sh <INPUT_FILES>... <OUTPUT_FILE>"
+    printf "Usage: gnuplot.sh <INPUT_FILES>... <OUTPUT_FILE>\n"
     exit 1
 fi
 
@@ -70,4 +70,4 @@ done
 gnuplot_script=${gnuplot_script::${#gnuplot_script}-1}
 
 # Plot everything.
-echo -e "$gnuplot_script" | gnuplot
+printf "$gnuplot_script" | gnuplot
