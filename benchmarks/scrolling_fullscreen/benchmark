@@ -2,12 +2,8 @@
 
 # Scroll all lines up with every line completely filled.
 
-alphabet=(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z)
 columns=$(tput cols)
 
-for char in ${alphabet[@]}; do
-    for column in $(seq $columns); do
-        printf "$char"
-    done
-    printf "\n"
+for char in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+    printf "%*s\n" $columns | tr ' ' "$char"
 done
