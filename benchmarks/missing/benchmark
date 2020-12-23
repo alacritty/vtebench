@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Print a lot of "missing" glyphs.
+
+columns=$(tput cols)
+lines=$(tput lines)
+
+# Assume private use area (0xE000 - 0xF8FF) results in "missing" glyphs.
+for i in $(seq 58000 58500); do
+    char=$(printf "\u$(printf '%04x' $i)")
+    printf "\e[H%*s" $((2 * $columns * $lines)) | tr ' ' "$char"
+done
