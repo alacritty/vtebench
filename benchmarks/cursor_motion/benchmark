@@ -2,8 +2,9 @@
 
 # Move cursor around for every single write.
 
-columns=$(tput cols)
-lines=$(tput lines)
+tty="/dev/$(ps -o tty= -p $$)"
+columns=$(tput cols < $tty)
+lines=$(tput lines < $tty)
 
 for char in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
     column_start=1

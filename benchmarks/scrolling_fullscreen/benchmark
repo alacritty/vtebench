@@ -2,7 +2,8 @@
 
 # Scroll all lines up with every line completely filled.
 
-columns=$(tput cols)
+tty="/dev/$(ps -o tty= -p $$)"
+columns=$(tput cols < $tty)
 
 for char in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
     printf "%*s\n" $columns | tr ' ' "$char"

@@ -1,5 +1,6 @@
 #!/bin/sh
 
-lines=$(tput lines)
+tty="/dev/$(ps -o tty= -p $$)"
+lines=$(tput lines < $tty)
 
 printf "\e[?1049h\e[$((lines / 2));${lines}r"
