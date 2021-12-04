@@ -2,8 +2,9 @@
 
 # Update the entire grid as often as possible with a huge payload in every cell.
 
-columns=$(tput cols)
-lines=$(tput lines)
+tty="/dev/$(ps -o tty= -p $$)"
+columns=$(tput cols < $tty)
+lines=$(tput lines < $tty)
 
 line_steps=1
 if [ $lines -lt 155 ]; then
