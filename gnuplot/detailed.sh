@@ -28,7 +28,7 @@ for col in $(seq 1 $num_cols); do
 
     # Setup gnuplot script with output format and file.
     gnuplot_script="\
-    set terminal svg noenhanced size 1000,750 background rgb 'white'
+    set terminal svg noenhanced size 1920,1080 background rgb 'white'
     set output \"${output_file}\"
     set xlabel \"samples\"
     set ylabel \"milliseconds (lower is better)\"
