@@ -1,10 +1,10 @@
 #![deny(clippy::all)]
 
-use structopt::StructOpt;
-
 mod bench;
 mod cli;
 mod format;
+
+use clap::Parser;
 
 use crate::bench::Results;
 use crate::cli::Config;
@@ -12,7 +12,7 @@ use crate::format::{DatFormat, Format, StdoutFormat};
 
 fn main() {
     // Parse CLI parameters.
-    let config = Config::from_args();
+    let config = Config::parse();
 
     // Find all available benchmarks.
     let mut loaders = bench::find_benchmarks(&config.benchmarks);
