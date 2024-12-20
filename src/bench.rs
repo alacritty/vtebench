@@ -154,7 +154,7 @@ impl Benchmark {
 
         let mut samples = Vec::new();
 
-        let max_samples = max_samples.unwrap_or(usize::max_value());
+        let max_samples = max_samples.unwrap_or(usize::MAX);
         let end = Instant::now() + Duration::from_secs(max_secs);
         for _ in (0..max_samples).take_while(|_| Instant::now() < end) {
             let duration = self.run_sample(&mut stdout);
@@ -263,7 +263,7 @@ impl Results {
             return 0.;
         }
 
-        let mean = self.mean() as f64;
+        let mean = self.mean();
         let len = self.samples.len();
         self.samples.iter().map(|&s| f64::powi(s as f64 - mean, 2)).sum::<f64>() / (len - 1) as f64
     }
