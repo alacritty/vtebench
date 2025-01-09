@@ -37,10 +37,11 @@ for col in $(seq 1 $num_cols); do
     # Add all columns for the input file to the gnuplot script.
     for input_index in $(seq 1 $(($# - 1))); do
         input_file=${!input_index}
+        input_filename=$(basename "$input_file")
         gnuplot_script+="\"$input_file\" \
             using $col \
             with linespoint \
-            title \"$input_file: \".columnhead($col),"
+            title \"$input_filename: \".columnhead($col),"
     done
     gnuplot_script=${gnuplot_script::${#gnuplot_script}-1}
 
