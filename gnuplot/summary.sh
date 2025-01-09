@@ -60,11 +60,12 @@ gnuplot_script+=$gnuplot_tics
 gnuplot_script+="plot "
 for input_index in $(seq 1 $num_inputs); do
     input_file=${!input_index}
+    input_filename=$(basename "$input_file")
     num_cols=$(cat "$input_file" | head -n 1 | wc -w)
     gnuplot_script+="for[col = 1:${num_cols}] \
         \"$input_file\" \
         using (col * $bench_width + $((box_width * (input_index - 1)))):col \
-        title (col == 1 ? \"$input_file\" : \"\") \
+        title (col == 1 ? \"$input_filename\" : \"\") \
         linecolor $input_index,"
 done
 gnuplot_script=${gnuplot_script::${#gnuplot_script}-1}
