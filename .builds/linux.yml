@@ -14,7 +14,8 @@ tasks:
       $HOME/.cargo/bin/rustup toolchain install nightly -c rustfmt
       cd vtebench
       $HOME/.cargo/bin/cargo +nightly fmt -- --check
-  - 1-57-0: |
-      $HOME/.cargo/bin/rustup toolchain install --profile minimal 1.57.0
+  - msrv: |
       cd vtebench
-      $HOME/.cargo/bin/cargo +1.57.0 test
+      msrv=$(cat Cargo.toml | grep "rust-version" | sed 's/.*"\(.*\)".*/\1/')
+      $HOME/.cargo/bin/rustup toolchain install --profile minimal $msrv
+      $HOME/.cargo/bin/cargo +$msrv test
