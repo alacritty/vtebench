@@ -7,8 +7,8 @@ description = "Terminal emulators benchmark"
 readme = "README.md"
 repository = "https://github.com/alacritty/vtebench"
 edition = "2021"
-rust-version = "1.57.0"
+rust-version = "1.74.0"
 
 [dependencies]
-clap = { version = "3.2.22", features = ["derive"] }
+clap = { version = "4.5.24", features = ["derive"] }
 walkdir = "2.3.1"
